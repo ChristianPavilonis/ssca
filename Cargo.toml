@@ -1,0 +1,16 @@
+[package]
+name = "shat-stack"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+axum = {version= "0.7.5", features = ["ws"]}
+futures = "0.3.30"
+serde = { version = "1.0.202", features = ["derive"] }
+serde_json = "1.0.117"
+shtml = { git = "https://github.com/swlkr/shtml"}
+tokio = { version = "1.0", features = ["full"] }
+tower = { version = "0.4", features = ["util"] }
+tower-http = { version = "0.5.0", features = ["fs", "trace"] }
