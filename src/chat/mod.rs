@@ -2,7 +2,7 @@ use std::{
     collections::HashSet,
     sync::{Arc, Mutex},
 };
-
+use crate::ChatState;
 use axum::extract::{
     ws::{Message, WebSocket},
     Query, State, WebSocketUpgrade,
@@ -21,34 +21,18 @@ pub struct Person {
 
 #[derive(Serialize, Deserialize)]
 struct HtmxMessage {
-    chat_message: String,
-}
-
-pub struct ChatState {
-    pub users: Mutex<HashSet<String>>,
-    pub tx: Sender<String>,
-}
-
-impl ChatState {
-    pub fn new() -> Self {
-        let (tx, _) = broadcast::channel(100);
-
-        Self {
-            users: Mutex::new(HashSet::new()),
-            tx,
-        }
-    }
+    message: String,
 }
 
 pub async fn ws(
     ws: WebSocketUpgrade,
     Query(person): Query<Person>,
-    State(state): State<Arc<ChatState>>,
+    State(state): State<ChatState>,
 ) -> impl IntoResponse {
     ws.on_upgrade(|socket| handle_socket(socket, state, person.name))
 }
 
-async fn handle_socket(socket: WebSocket, state: Arc<ChatState>, name: String) {
+async fn handle_socket(socket: WebSocket, state: ChatState, name: String) {
     let (mut sender, mut receiver) = socket.split();
 
     let mut rx = state.tx.subscribe();
@@ -69,7 +53,7 @@ async fn handle_socket(socket: WebSocket, state: Arc<ChatState>, name: String) {
     let mut recv_task = tokio::spawn(async move {
         while let Some(Ok(Message::Text(raw_message))) = receiver.next().await {
             let message = match serde_json::from_str::<HtmxMessage>(raw_message.as_str()) {
-                Ok(htmx) => format!("{}: {}", name, htmx.chat_message),
+                Ok(htmx) => format!("{}: {}", name, htmx.message),
                 Err(e) => {
                     eprintln!("error parsing message {e}");
                     "".to_string()

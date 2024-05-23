@@ -28,7 +28,7 @@ pub fn Chat(person: Person) -> Component {
                 <div class="flex flex-col gap-12" id="chat_room" hx-swap-oob="beforeend">
                 </div>
                 <form class="fixed bottom-10 flex max-w-600 w-full" id="message-form" ws-send>
-                    <input class="bg-gray-700 border border-white rounded text-lg block w-full" name="chat_message">
+                    <input class="bg-gray-700 border border-white rounded text-lg block w-full" name="message">
                     <button class="ml-12 rounded bg-gray-700 px-12">Send</button>
                 </form>
             </div>
