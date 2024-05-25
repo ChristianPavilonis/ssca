@@ -3,6 +3,7 @@ use std::{
     sync::{Arc, Mutex},
 };
 
+use anyhow::Result;
 use axum::{
     extract::{self, FromRef},
     response::Html,
@@ -15,14 +16,20 @@ use layouts::Layout;
 use rooms::actions::{create_room, show_create_room};
 use shtml::{html as view, Component, Elements, Render};
 use sqlx::{sqlite::SqlitePoolOptions, Pool, Sqlite};
-use tokio::sync::broadcast::{self, Sender};
+use tokio::{
+    sync::broadcast::{self, Sender},
+    time::Duration,
+};
 use tower_http::services::ServeDir;
+use tower_sessions::{cookie::time, ExpiredDeletion, Expiry, SessionManagerLayer};
+use tower_sessions_sqlx_store::SqliteStore;
 
 mod chat;
 mod components;
 mod join;
 mod layouts;
 mod rooms;
+mod users;
 
 #[derive(Debug, Clone)]
 pub struct AppState {
@@ -62,6 +69,7 @@ impl FromRef<AppState> for ChatState {
 #[tokio::main]
 async fn main() {
     let db = setup_db().await;
+    let session_layer = create_session_layer(db.clone()).await;
     let state = AppState::new(db);
 
     let app = Router::new()
@@ -72,7 +80,8 @@ async fn main() {
         .route("/room/create", get(show_create_room))
         .route("/room", post(create_room))
         .fallback_service(ServeDir::new("public"))
-        .with_state(state);
+        .with_state(state)
+        .layer(session_layer);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
@@ -104,4 +113,21 @@ async fn setup_db() -> Db {
         .expect("Failed to run migrations");
 
     db
+}
+
+async fn create_session_layer(db: Db) -> SessionManagerLayer<SqliteStore> {
+    let session_store = SqliteStore::new(db);
+    session_store
+        .migrate()
+        .await
+        .expect("failed to migrate session store");
+
+    tokio::task::spawn(
+        session_store
+            .clone()
+            .continuously_delete_expired(Duration::from_secs(60)),
+    );
+    let expiry = Expiry::OnInactivity(time::Duration::days(1));
+
+    SessionManagerLayer::new(session_store).with_expiry(expiry)
 }

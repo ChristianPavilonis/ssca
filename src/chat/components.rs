@@ -1,26 +1,21 @@
 #![allow(non_snake_case)]
 
+use super::Person;
+use crate::components::Button;
+use crate::layouts::Layout;
 use axum::{
     extract::Query,
     response::{Html, IntoResponse},
 };
-
 use shtml::{html as view, Component, Elements, Render};
+use tower_sessions::Session;
 
-use super::Person;
-use crate::layouts::Layout;
-
-pub async fn chat(Query(person): Query<Person>) -> Html<String> {
-    let html = view! {
-        <Chat person=person></Chat>
-    }
-    .to_string();
-
-    Html(html)
+pub async fn chat() -> Html<String> {
+    Html(Chat().to_string())
 }
 
-pub fn Chat(person: Person) -> Component {
-    let ws_url = format!("/chat/ws?name={}", person.name);
+pub fn Chat() -> Component {
+    let ws_url = "/chat/ws";
 
     view! {
         <Layout>
@@ -29,13 +24,13 @@ pub fn Chat(person: Person) -> Component {
                 </div>
                 <form class="fixed bottom-10 flex max-w-600 w-full" id="message-form" ws-send>
                     <input class="bg-gray-700 border border-white rounded text-lg block w-full" name="message">
-                    <button class="ml-12 rounded bg-gray-700 px-12">Send</button>
+                    <Button>Send</Button>
                 </form>
             </div>
 
             <script>
                 htmx.on("htmx:wsAfterMessage", () => {
-                    document.querySelector("[name=chat_message]").value = "";
+                    document.querySelector("[name=message]").value = "";
                 });
             </script>
         </Layout>

@@ -1,11 +1,13 @@
 #![allow(non_snake_case)]
 
+use crate::components::{Button, Field};
 use axum::{
     extract::{Form, State},
     response::{Html, IntoResponse, Redirect},
 };
 use serde::Deserialize;
 use shtml::{html as view, Component, Elements, Render};
+use tower_sessions::Session;
 
 use crate::ChatState;
 
@@ -14,7 +16,12 @@ pub struct JoinForm {
     pub name: String,
 }
 
-pub async fn join(State(chat): State<ChatState>, Form(join_form): Form<JoinForm>) -> Redirect {
+pub async fn join(
+    State(chat): State<ChatState>,
+    session: Session,
+    Form(join_form): Form<JoinForm>,
+) -> Redirect {
+    session.insert("name", &join_form.name).await.unwrap();
     let mut users = chat.users.lock().unwrap();
 
     if users.contains(&join_form.name) {
@@ -22,20 +29,18 @@ pub async fn join(State(chat): State<ChatState>, Form(join_form): Form<JoinForm>
     }
 
     users.insert(join_form.name.clone());
-    let url = format!("/chat?name={}", join_form.name);
 
-    Redirect::to(url.as_str())
+    Redirect::to("/chat")
 }
 
 pub fn Join() -> Component {
     view! {
         <form action="/join" method="post">
-            <label>
-                <span class="block mb-12 text-lg">Name</span>
-                <input class="block rounded text-black" type="text" name="name"/>
-            </label>
+            <Field name="name" typ="text">
+                Name
+            </Field>
 
-            <button type="submit">Join</button>
+            <Button>Join</Button>
         </form>
     }
 }

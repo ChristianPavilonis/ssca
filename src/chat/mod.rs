@@ -1,16 +1,21 @@
+use crate::ChatState;
+use anyhow::bail;
+use axum::response::{Html, IntoResponse};
+use axum::{
+    extract::{
+        ws::{Message, WebSocket},
+        Query, State, WebSocketUpgrade,
+    },
+    response::Redirect,
+};
+use futures::{sink::SinkExt, stream::StreamExt, FutureExt};
+use serde::{Deserialize, Serialize};
 use std::{
     collections::HashSet,
     sync::{Arc, Mutex},
 };
-use crate::ChatState;
-use axum::extract::{
-    ws::{Message, WebSocket},
-    Query, State, WebSocketUpgrade,
-};
-use axum::response::{Html, IntoResponse};
-use futures::{sink::SinkExt, stream::StreamExt};
-use serde::{Deserialize, Serialize};
 use tokio::sync::broadcast::{self, Sender};
+use tower_sessions::Session;
 
 pub mod components;
 
@@ -25,11 +30,17 @@ struct HtmxMessage {
 }
 
 pub async fn ws(
+    session: Session,
     ws: WebSocketUpgrade,
-    Query(person): Query<Person>,
     State(state): State<ChatState>,
 ) -> impl IntoResponse {
-    ws.on_upgrade(|socket| handle_socket(socket, state, person.name))
+    let name = match session.get("name").await {
+        Ok(Some(name)) => name,
+        Ok(None) => 
+            panic!("no name"),
+        Err(e) => panic!("{e}"),
+    };
+    ws.on_upgrade(|socket| handle_socket(socket, state, name))
 }
 
 async fn handle_socket(socket: WebSocket, state: ChatState, name: String) {

@@ -5,6 +5,12 @@ create table rooms (
 	name VARCHAR
 )
 
+create table users (
+	id integer primary key
+	name VARCHAR
+	password VARCHAR
+)
+
 -- todos:
 -- - users
 -- - assign users to rooms
