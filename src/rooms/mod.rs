@@ -1,7 +1,7 @@
 use anyhow::Result;
 use sqlx::prelude::FromRow;
 
-use crate::{Db, Pool};
+use crate::{Db};
 
 pub mod actions;
 mod views;

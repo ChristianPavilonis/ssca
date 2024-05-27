@@ -1,9 +1,8 @@
-use crate::{users::User, AppState};
+use crate::{users::User};
 use axum::{
     async_trait,
-    extract::{FromRequest, FromRequestParts, Request, State},
+    extract::{FromRequestParts},
     http::{request::Parts, StatusCode},
-    response::Response,
 };
 use tower_sessions::Session;
 

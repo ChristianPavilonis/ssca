@@ -5,7 +5,6 @@ use axum::{
     Router,
 };
 use chat::{actions::ws, views::chat};
-use extractors::AuthenticatedUser;
 use join::Join;
 use layouts::Layout;
 use rooms::actions::{create_room, show_create_room, show_rooms};
