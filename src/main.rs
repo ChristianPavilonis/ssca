@@ -1,21 +1,19 @@
-use std::{
-    collections::HashSet,
-    sync::{Arc, Mutex},
-};
-
-use anyhow::Result;
 use axum::{
     extract::{self, FromRef},
     response::Html,
     routing::{get, post},
     Router,
 };
-use chat::{components::chat, ws};
+use chat::{actions::ws, views::chat};
 use join::Join;
 use layouts::Layout;
-use rooms::actions::{create_room, show_create_room};
+use rooms::actions::{create_room, show_create_room, show_rooms};
 use shtml::{html as view, Component, Elements, Render};
 use sqlx::{sqlite::SqlitePoolOptions, Pool, Sqlite};
+use std::{
+    collections::HashSet,
+    sync::{Arc, Mutex},
+};
 use tokio::{
     sync::broadcast::{self, Sender},
     time::Duration,
@@ -23,9 +21,11 @@ use tokio::{
 use tower_http::services::ServeDir;
 use tower_sessions::{cookie::time, ExpiredDeletion, Expiry, SessionManagerLayer};
 use tower_sessions_sqlx_store::SqliteStore;
+use users::actions::{login, register, show_login, show_register};
 
 mod chat;
 mod components;
+mod extractors;
 mod join;
 mod layouts;
 mod rooms;
@@ -74,11 +74,16 @@ async fn main() {
 
     let app = Router::new()
         .route("/", get(home))
+        .route("/register", get(show_register))
+        .route("/register", post(register))
+        .route("/login", get(show_login))
+        .route("/login", post(login))
         .route("/join", post(join::join))
         .route("/chat", get(chat))
         .route("/chat/ws", get(ws))
-        .route("/room/create", get(show_create_room))
-        .route("/room", post(create_room))
+        .route("/rooms/create", get(show_create_room))
+        .route("/rooms", get(show_rooms))
+        .route("/rooms", post(create_room))
         .fallback_service(ServeDir::new("public"))
         .with_state(state)
         .layer(session_layer);
@@ -105,6 +110,19 @@ type Db = Pool<Sqlite>;
 async fn setup_db() -> Db {
     let db = SqlitePoolOptions::new()
         .connect("./db/db.sqlite")
+        .await
+        .expect("could not connect to sqlite database");
+    sqlx::migrate!("db/migrations")
+        .run(&db)
+        .await
+        .expect("Failed to run migrations");
+
+    db
+}
+
+pub async fn test_db() -> Db {
+    let db = SqlitePoolOptions::new()
+        .connect(":memory:")
         .await
         .expect("could not connect to sqlite database");
     sqlx::migrate!("db/migrations")

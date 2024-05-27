@@ -7,8 +7,11 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.86"
+async-trait = "0.1.80"
 axum = {version= "0.7.5", features = ["ws"]}
+bcrypt = "0.15.1"
 futures = "0.3.30"
+lazy_static = "1.4.0"
 serde = { version = "1.0.202", features = ["derive"] }
 serde_json = "1.0.117"
 shtml = { git = "https://github.com/swlkr/shtml"}

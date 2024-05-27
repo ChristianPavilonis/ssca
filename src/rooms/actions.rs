@@ -1,4 +1,4 @@
-use crate::ChatState;
+use crate::{AppState, ChatState};
 use axum::{
     extract::State,
     response::{Html, IntoResponse, Redirect},
@@ -6,20 +6,35 @@ use axum::{
 };
 use serde::Deserialize;
 
+use super::{
+    views::{CreateRoom, RoomList},
+    Room,
+};
+
 #[derive(Debug, Deserialize)]
 pub struct CreateRoomForm {
     pub name: String,
 }
 
-pub async fn create_room<'a>(
-    State(state): State<ChatState>,
+pub async fn create_room(
+    State(state): State<AppState>,
     Form(form): Form<CreateRoomForm>,
 ) -> impl IntoResponse {
-    // super::create_room(&state.db, form.name).await.unwrap();
+    super::create_room(&state.db, form.name.to_lowercase())
+        .await
+        .unwrap();
 
-    Redirect::to("/")
+    Redirect::to("/rooms")
 }
 
 pub async fn show_create_room() -> Html<String> {
-    Html(super::views::CreateRoom().to_string())
+    Html(CreateRoom().to_string())
+}
+
+pub async fn show_rooms(State(state): State<AppState>) -> Html<String> {
+    let rooms = sqlx::query_as::<_, Room>("select * from rooms")
+        .fetch_all(&state.db)
+        .await
+        .unwrap();
+    Html(RoomList(rooms).to_string())
 }

@@ -7,7 +7,7 @@ use axum::{
     extract::Query,
     response::{Html, IntoResponse},
 };
-use shtml::{html as view, Component, Elements, Render};
+use shtml::{html, Component, Elements, Render};
 use tower_sessions::Session;
 
 pub async fn chat() -> Html<String> {
@@ -17,9 +17,9 @@ pub async fn chat() -> Html<String> {
 pub fn Chat() -> Component {
     let ws_url = "/chat/ws";
 
-    view! {
+    html! {
         <Layout>
-            <div class="relative" hx-ext="ws" ws-connect={ws_url}>
+            <div class="relative max-h-[100vh] overflow-y-auto" hx-ext="ws" ws-connect={ws_url}>
                 <div class="flex flex-col gap-12" id="chat_room" hx-swap-oob="beforeend">
                 </div>
                 <form class="fixed bottom-10 flex max-w-600 w-full" id="message-form" ws-send>
@@ -31,6 +31,8 @@ pub fn Chat() -> Component {
             <script>
                 htmx.on("htmx:wsAfterMessage", () => {
                     document.querySelector("[name=message]").value = "";
+
+                    document.querySelector("#chat_room");
                 });
             </script>
         </Layout>
@@ -38,7 +40,7 @@ pub fn Chat() -> Component {
 }
 
 pub fn Message(text: String) -> Component {
-    view! {
+    html! {
         <div id="chat_room" hx-swap-oob="beforeend">
             <div class="bg-gray-600 p-12 rounded">
                 {text}
