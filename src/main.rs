@@ -1,5 +1,5 @@
 use axum::{
-    extract::{self, FromRef},
+    extract::{FromRef},
     response::Html,
     routing::{get, post},
     Router,
@@ -8,7 +8,7 @@ use chat::{actions::ws, views::chat};
 use join::Join;
 use layouts::Layout;
 use rooms::actions::{create_room, show_create_room, show_rooms};
-use shtml::{html as view, Component, Elements, Render};
+use shtml::{html as view, Component, Render};
 use sqlx::{sqlite::SqlitePoolOptions, Pool, Sqlite};
 use std::{
     collections::HashSet,

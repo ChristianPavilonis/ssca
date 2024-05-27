@@ -1,22 +1,12 @@
 use crate::chat::views::Message;
-use crate::chat::{views, HtmxMessage};
+use crate::chat::{HtmxMessage};
 use crate::ChatState;
-use axum::response::{Html, IntoResponse};
 use axum::{
     extract::{
         ws::{Message, WebSocket},
-        Query, State, WebSocketUpgrade,
     },
-    response::Redirect,
 };
-use futures::{sink::SinkExt, stream::StreamExt, FutureExt};
-use serde::{Deserialize, Serialize};
-use std::{
-    collections::HashSet,
-    sync::{Arc, Mutex},
-};
-use tokio::sync::broadcast::{self, Sender};
-use tower_sessions::Session;
+use futures::{sink::SinkExt, stream::StreamExt};
 
 pub async fn handle_socket(socket: WebSocket, state: ChatState, name: String) {
     let (mut sender, mut receiver) = socket.split();

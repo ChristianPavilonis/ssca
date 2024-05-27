@@ -1,14 +1,11 @@
 #![allow(non_snake_case)]
 
-use super::Person;
 use crate::components::Button;
 use crate::layouts::Layout;
 use axum::{
-    extract::Query,
-    response::{Html, IntoResponse},
+    response::{Html},
 };
-use shtml::{html, Component, Elements, Render};
-use tower_sessions::Session;
+use shtml::{html, Component, Render};
 
 pub async fn chat() -> Html<String> {
     Html(Chat().to_string())

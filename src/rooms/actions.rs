@@ -1,4 +1,4 @@
-use crate::{AppState, ChatState};
+use crate::{AppState};
 use axum::{
     extract::State,
     response::{Html, IntoResponse, Redirect},

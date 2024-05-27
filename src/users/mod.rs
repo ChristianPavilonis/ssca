@@ -1,5 +1,3 @@
-use anyhow::Result;
-use bcrypt::DEFAULT_COST;
 use serde::Deserialize;
 use sqlx::prelude::FromRow;
 

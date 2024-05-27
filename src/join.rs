@@ -3,10 +3,10 @@
 use crate::components::{Button, Field};
 use axum::{
     extract::{Form, State},
-    response::{Html, IntoResponse, Redirect},
+    response::{Redirect},
 };
 use serde::Deserialize;
-use shtml::{html as view, Component, Elements, Render};
+use shtml::{html as view, Component, Render};
 use tower_sessions::Session;
 
 use crate::ChatState;
