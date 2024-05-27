@@ -1357,7 +1357,7 @@ dependencies = [
  "axum",
  "bcrypt",
  "futures",
- "lazy_static",
+ "once_cell",
  "serde",
  "serde_json",
  "shtml",

@@ -1,7 +1,7 @@
 use anyhow::Result;
 use sqlx::prelude::FromRow;
 
-use crate::Db;
+use crate::{Db, Pool};
 
 pub mod actions;
 mod views;
@@ -12,17 +12,6 @@ pub struct Room {
     pub name: String,
 }
 
-impl Room {
-    pub fn new<T>(name: T) -> Self
-    where
-        T: ToString,
-    {
-        Self {
-            id: None,
-            name: name.to_string(),
-        }
-    }
-}
 
 pub async fn create_room(db: &Db, room: String) -> Result<()> {
     sqlx::query("insert into rooms (name) values (?1)")

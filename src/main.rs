@@ -1,14 +1,15 @@
 use axum::{
-    extract::{FromRef},
+    extract::FromRef,
     response::Html,
     routing::{get, post},
     Router,
 };
 use chat::{actions::ws, views::chat};
+use extractors::AuthenticatedUser;
 use join::Join;
 use layouts::Layout;
 use rooms::actions::{create_room, show_create_room, show_rooms};
-use shtml::{html as view, Component, Render};
+use shtml::{html, Component, Render};
 use sqlx::{sqlite::SqlitePoolOptions, Pool, Sqlite};
 use std::{
     collections::HashSet,
@@ -93,7 +94,7 @@ async fn main() {
 }
 
 async fn home() -> Html<String> {
-    let result = view! {
+    let result = html! {
         <Layout>
             <h2 class="text-xl">
                 Welcome to the shat stack chat app!
