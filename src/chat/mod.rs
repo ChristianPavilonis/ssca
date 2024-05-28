@@ -13,4 +13,3 @@ pub struct Person {
 struct HtmxMessage {
     message: String,
 }
-

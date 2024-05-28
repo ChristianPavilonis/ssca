@@ -1,21 +1,15 @@
-use crate::chat::views::Message;
-use crate::chat::{HtmxMessage};
-use crate::ChatState;
-use axum::{
-    extract::{
-        ws::{Message, WebSocket},
-    },
-};
+use crate::chat::views::{JoinedNotification, Message};
+use crate::chat::HtmxMessage;
+use axum::extract::ws::{Message, WebSocket};
 use futures::{sink::SinkExt, stream::StreamExt};
+use tokio::sync::broadcast::Sender;
 
-pub async fn handle_socket(socket: WebSocket, state: ChatState, name: String) {
+pub async fn handle_socket(socket: WebSocket, tx: Sender<String>, name: String) {
     let (mut sender, mut receiver) = socket.split();
 
-    let mut rx = state.tx.subscribe();
+    let mut rx = tx.subscribe();
 
-    state
-        .tx
-        .send(format!("{} joined!", name))
+    tx.send(JoinedNotification(name.clone()).to_string())
         .expect("failed to send message");
 
     let mut send_task = tokio::spawn(async move {
@@ -37,7 +31,7 @@ pub async fn handle_socket(socket: WebSocket, state: ChatState, name: String) {
             };
 
             let message = Message(message).to_string();
-            state.tx.send(message).expect("failed to send message");
+            tx.send(message).expect("failed to send message");
         }
     });
 

@@ -4,14 +4,14 @@ use axum::{
     routing::{get, post},
     Router,
 };
-use chat::{actions::ws, views::chat};
+use chat::actions::{chat, ws};
 use join::Join;
 use layouts::Layout;
 use rooms::actions::{create_room, show_create_room, show_rooms};
 use shtml::{html, Component, Render};
 use sqlx::{sqlite::SqlitePoolOptions, Pool, Sqlite};
 use std::{
-    collections::HashSet,
+    collections::{HashMap, HashSet},
     sync::{Arc, Mutex},
 };
 use tokio::{
@@ -48,18 +48,19 @@ impl AppState {
 
 #[derive(Debug, Clone)]
 pub struct ChatState {
-    pub tx: Sender<String>,
-    pub users: Arc<Mutex<HashSet<String>>>,
+    pub rooms: Arc<Mutex<HashMap<String, Sender<String>>>>,
+    pub users: Arc<Mutex<HashSet<String>>>, // should maybe nest it into rooms
 }
 
 impl ChatState {
     pub fn new() -> Self {
-        let (tx, _) = broadcast::channel(100);
+        let rooms = Arc::new(Mutex::new(HashMap::new()));
         let users = Arc::new(Mutex::new(HashSet::new()));
 
-        Self { tx, users }
+        Self { rooms, users }
     }
 }
+
 impl FromRef<AppState> for ChatState {
     fn from_ref(input: &AppState) -> Self {
         input.chat.clone()
@@ -79,8 +80,8 @@ async fn main() {
         .route("/login", get(show_login))
         .route("/login", post(login))
         .route("/join", post(join::join))
-        .route("/chat", get(chat))
-        .route("/chat/ws", get(ws))
+        .route("/chat/:room", get(chat))
+        .route("/chat/ws/:room", get(ws))
         .route("/rooms/create", get(show_create_room))
         .route("/rooms", get(show_rooms))
         .route("/rooms", post(create_room))
