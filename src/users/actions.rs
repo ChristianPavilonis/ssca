@@ -3,7 +3,7 @@ use super::{
     find_user_by_name,
     views::{Login, Register},
 };
-use crate::AppState;
+use crate::state::AppState;
 use axum::{
     extract::State,
     response::{Html, Redirect},

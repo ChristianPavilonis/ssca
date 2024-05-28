@@ -1,5 +1,7 @@
 use axum::{
-    extract::FromRef,
+    async_trait,
+    extract::{FromRef, FromRequestParts, State},
+    http::request::Parts,
     response::Html,
     routing::{get, post},
     Router,
@@ -10,6 +12,7 @@ use layouts::Layout;
 use rooms::actions::{create_room, show_create_room, show_rooms};
 use shtml::{html, Component, Render};
 use sqlx::{sqlite::SqlitePoolOptions, Pool, Sqlite};
+use state::AppState;
 use std::{
     collections::{HashMap, HashSet},
     sync::{Arc, Mutex},
@@ -22,50 +25,16 @@ use tower_http::services::ServeDir;
 use tower_sessions::{cookie::time, ExpiredDeletion, Expiry, SessionManagerLayer};
 use tower_sessions_sqlx_store::SqliteStore;
 use users::actions::{login, register, show_login, show_register};
+use util::ShatError;
 
 mod chat;
 mod components;
-mod extractors;
 mod join;
 mod layouts;
 mod rooms;
+mod state;
 mod users;
-
-#[derive(Debug, Clone)]
-pub struct AppState {
-    pub chat: ChatState,
-    pub db: Db,
-}
-
-impl AppState {
-    pub fn new(db: Db) -> Self {
-        Self {
-            db,
-            chat: ChatState::new(),
-        }
-    }
-}
-
-#[derive(Debug, Clone)]
-pub struct ChatState {
-    pub rooms: Arc<Mutex<HashMap<String, Sender<String>>>>,
-    pub users: Arc<Mutex<HashSet<String>>>, // should maybe nest it into rooms
-}
-
-impl ChatState {
-    pub fn new() -> Self {
-        let rooms = Arc::new(Mutex::new(HashMap::new()));
-        let users = Arc::new(Mutex::new(HashSet::new()));
-
-        Self { rooms, users }
-    }
-}
-
-impl FromRef<AppState> for ChatState {
-    fn from_ref(input: &AppState) -> Self {
-        input.chat.clone()
-    }
-}
+mod util;
 
 #[tokio::main]
 async fn main() {

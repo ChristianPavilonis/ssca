@@ -5,15 +5,20 @@ use axum::{
 use tokio::sync::broadcast;
 use tower_sessions::Session;
 
-use crate::ChatState;
+use crate::util::ShatError;
 use crate::{chat::ws::handle_socket, rooms::get_room_by_name, AppState};
 
 use super::views::Chat;
 
-pub async fn chat(Path(room): Path<String>, State(state): State<AppState>) -> Html<String> {
-    let room = get_room_by_name(&state.db, room).await.unwrap();
+pub async fn chat(
+    Path(room): Path<String>,
+    State(state): State<AppState>,
+) -> Result<Html<String>, ShatError> {
+    let room = get_room_by_name(&state.db, &room)
+        .await
+        .map_err(|_| ShatError::NotFound)?;
 
-    Html(Chat(room).to_string())
+    Ok(Html(Chat(room).to_string()))
 }
 
 pub async fn ws(
@@ -21,23 +26,27 @@ pub async fn ws(
     ws: WebSocketUpgrade,
     State(state): State<AppState>,
     Path(room): Path<String>,
-) -> impl IntoResponse {
+) -> Result<impl IntoResponse, ShatError> {
     let name = match session.get("name").await {
         Ok(Some(name)) => name,
-        Ok(None) => panic!("no name"),
-        Err(e) => panic!("{e}"),
+        Ok(None) => return Err(ShatError::BadRequest),
+        Err(_) => return Err(ShatError::InternalError),
     };
+
+    let room = get_room_by_name(&state.db, &room)
+        .await
+        .map_err(|_| ShatError::NotFound)?;
+
     let mut rooms = state.chat.rooms.lock().unwrap();
 
-    let tx = match rooms.get(&room) {
+    let tx = match rooms.get(&room.name) {
         Some(tx) => tx.clone(),
         None => {
-            // check if exists in db
             let (tx, _) = broadcast::channel(1000);
-            rooms.insert(room, tx.clone());
+            rooms.insert(room.name, tx.clone());
             tx
         }
     };
 
-    ws.on_upgrade(|socket| handle_socket(socket, tx, name))
+    Ok(ws.on_upgrade(|socket| handle_socket(socket, tx, name)))
 }

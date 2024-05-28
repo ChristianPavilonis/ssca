@@ -9,12 +9,12 @@ pub fn Chat(room: Room) -> Component {
 
     html! {
         <Layout>
-            <div class="">
+            <div>
                 <div id="scroll" class="relative max-h-[100vh] overflow-y-auto pb-60" hx-ext="ws" ws-connect={ws_url}>
                     <div class="flex flex-col gap-12" id="chat_room" hx-swap-oob="beforeend">
                     </div>
                     <form class="fixed bottom-10 flex max-w-600 w-full" id="message-form" ws-send>
-                        <input class="bg-gray-700 border border-white rounded text-lg block w-full" name="message">
+                        <input class="bg-gray-700 border border-white rounded text-lg block w-full" name="message" required>
                         <Button>Send</Button>
                     </form>
                 </div>
@@ -23,7 +23,6 @@ pub fn Chat(room: Room) -> Component {
             <script>
                 htmx.on("htmx:wsAfterSend", () => {
                     document.querySelector("[name=message]").value = "";
-                    document.querySelector("#chat_room");
                 });
                 htmx.on("htmx:wsAfterMessage", () => {
                     let scroll = document.querySelector("#scroll");

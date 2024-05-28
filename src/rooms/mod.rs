@@ -30,7 +30,7 @@ pub async fn get_room_by_id(db: &Db, id: u32) -> Result<Room> {
     Ok(room)
 }
 
-pub async fn get_room_by_name(db: &Db, name: String) -> Result<Room> {
+pub async fn get_room_by_name(db: &Db, name: &String) -> Result<Room> {
     let room = sqlx::query_as::<_, Room>("select * from rooms where name = ?")
         .bind(name)
         .fetch_one(db)
@@ -90,7 +90,7 @@ mod tests {
             .await
             .expect("error creating room");
 
-        let room = get_room_by_name(&db, "another".to_string())
+        let room = get_room_by_name(&db, &"another".to_string())
             .await
             .expect("geez get a room!");
 

@@ -1,15 +1,16 @@
 #![allow(non_snake_case)]
 
-use crate::components::{Button, Field};
+use crate::{
+    components::{Button, Field},
+    state::ChatState,
+};
 use axum::{
     extract::{Form, State},
-    response::{Redirect},
+    response::Redirect,
 };
 use serde::Deserialize;
-use shtml::{html as view, Component, Render};
+use shtml::{html, Component, Render};
 use tower_sessions::Session;
-
-use crate::ChatState;
 
 #[derive(Deserialize)]
 pub struct JoinForm {
@@ -34,7 +35,7 @@ pub async fn join(
 }
 
 pub fn Join() -> Component {
-    view! {
+    html! {
         <form action="/join" method="post">
             <Field name="name" typ="text">
                 Name

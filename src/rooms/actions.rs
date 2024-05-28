@@ -1,4 +1,4 @@
-use crate::{AppState};
+use crate::{users::extractors::AuthenticatedUser, AppState};
 use axum::{
     extract::State,
     response::{Html, IntoResponse, Redirect},
@@ -31,7 +31,14 @@ pub async fn show_create_room() -> Html<String> {
     Html(CreateRoom().to_string())
 }
 
-pub async fn show_rooms(State(state): State<AppState>) -> Html<String> {
+pub async fn show_rooms(
+    State(state): State<AppState>,
+    AuthenticatedUser(user): AuthenticatedUser,
+) -> Html<String> {
+
+    println!("{:?}", user);
+
+
     let rooms = sqlx::query_as::<_, Room>("select * from rooms")
         .fetch_all(&state.db)
         .await
