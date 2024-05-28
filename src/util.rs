@@ -1,11 +1,10 @@
 use core::fmt;
 use std::error::Error;
 
-use crate::{components, layouts::Layout};
 use axum::{
     body::Body,
     http::{Response, StatusCode},
-    response::{Html, IntoResponse},
+    response::{IntoResponse},
 };
 use shtml::{html, Component};
 

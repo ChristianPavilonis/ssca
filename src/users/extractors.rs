@@ -1,8 +1,8 @@
 use crate::{users::User, util::ShatError, AppState};
 use axum::{
     async_trait,
-    extract::{FromRef, FromRequestParts, State},
-    http::{request::Parts, StatusCode},
+    extract::{FromRef, FromRequestParts},
+    http::{request::Parts},
     RequestPartsExt,
 };
 use tower_sessions::Session;
