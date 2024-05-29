@@ -16,16 +16,16 @@ use tower_http::services::ServeDir;
 use tower_sessions::{cookie::time, ExpiredDeletion, Expiry, Session, SessionManagerLayer};
 use tower_sessions_sqlx_store::SqliteStore;
 use users::actions::{login, register, show_login, show_register};
-use util::ShatError;
+use error::ShatError;
 
 mod chat;
 mod components;
+mod error;
 mod join;
 mod layouts;
 mod rooms;
 mod state;
 mod users;
-mod util;
 
 #[tokio::main]
 async fn main() {

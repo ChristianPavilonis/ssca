@@ -5,7 +5,7 @@ use axum::{
 use tokio::sync::broadcast;
 use tower_sessions::Session;
 
-use crate::util::ShatError;
+use crate::error::ShatError;
 use crate::{chat::ws::handle_socket, rooms::get_room_by_name, AppState};
 
 use super::views::Chat;

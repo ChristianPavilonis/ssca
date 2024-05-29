@@ -1362,27 +1362,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "shat-stack"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "async-trait",
- "axum",
- "bcrypt",
- "futures",
- "once_cell",
- "serde",
- "serde_json",
- "shtml",
- "sqlx",
- "tokio",
- "tower",
- "tower-http",
- "tower-sessions",
- "tower-sessions-sqlx-store",
-]
-
-[[package]]
 name = "shtml"
 version = "0.1.0"
 source = "git+https://github.com/swlkr/shtml#5360e62c8fb904662acbf4db7a5afd19de36444a"
@@ -1679,6 +1658,27 @@ dependencies = [
  "tracing",
  "url",
  "urlencoding",
+]
+
+[[package]]
+name = "ssca"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "axum",
+ "bcrypt",
+ "futures",
+ "once_cell",
+ "serde",
+ "serde_json",
+ "shtml",
+ "sqlx",
+ "tokio",
+ "tower",
+ "tower-http",
+ "tower-sessions",
+ "tower-sessions-sqlx-store",
 ]
 
 [[package]]

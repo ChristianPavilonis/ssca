@@ -11,7 +11,7 @@ use tokio::{
     sync::broadcast::{Sender},
 };
 
-use crate::{util::ShatError, Db};
+use crate::{error::ShatError, Db};
 
 #[derive(Debug, Clone, FromRef)]
 pub struct AppState {

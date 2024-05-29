@@ -1,4 +1,4 @@
-use crate::{users::User, util::ShatError, AppState};
+use crate::{error::ShatError, users::User, AppState};
 use axum::{
     async_trait,
     extract::{FromRef, FromRequestParts},
@@ -17,8 +17,6 @@ where
     S: Send + Sync,
     AppState: FromRef<S>,
 {
-    #[doc = r#" If the extractor fails it'll use this "rejection" type. A rejection is"#]
-    #[doc = r" a kind of error that can be converted into a response."]
     type Rejection = ShatError;
 
     async fn from_request_parts(req: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
@@ -50,8 +48,6 @@ where
     S: Send + Sync,
     AppState: FromRef<S>,
 {
-    #[doc = r#" If the extractor fails it'll use this "rejection" type. A rejection is"#]
-    #[doc = r" a kind of error that can be converted into a response."]
     type Rejection = ShatError;
 
     async fn from_request_parts(req: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
