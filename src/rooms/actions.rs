@@ -1,4 +1,7 @@
-use crate::{users::extractors::AuthenticatedUser, AppState};
+use crate::{
+    users::extractors::{AuthenticatedUser, OptionalUser},
+    AppState,
+};
 use axum::{
     extract::State,
     response::{Html, IntoResponse, Redirect},
@@ -17,6 +20,7 @@ pub struct CreateRoomForm {
 }
 
 pub async fn create_room(
+    AuthenticatedUser(_): AuthenticatedUser,
     State(state): State<AppState>,
     Form(form): Form<CreateRoomForm>,
 ) -> impl IntoResponse {
@@ -27,21 +31,17 @@ pub async fn create_room(
     Redirect::to("/rooms")
 }
 
-pub async fn show_create_room() -> Html<String> {
+pub async fn show_create_room(AuthenticatedUser(_): AuthenticatedUser) -> Html<String> {
     Html(CreateRoom().to_string())
 }
 
 pub async fn show_rooms(
+    OptionalUser(user): OptionalUser,
     State(state): State<AppState>,
-    AuthenticatedUser(user): AuthenticatedUser,
 ) -> Html<String> {
-
-    println!("{:?}", user);
-
-
     let rooms = sqlx::query_as::<_, Room>("select * from rooms")
         .fetch_all(&state.db)
         .await
         .unwrap();
-    Html(RoomList(rooms).to_string())
+    Html(RoomList(rooms, user).to_string())
 }

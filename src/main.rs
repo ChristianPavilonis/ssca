@@ -4,19 +4,19 @@ use axum::{
     Router,
 };
 use chat::actions::{chat, ws};
+use components::ButtonLink;
 use join::Join;
 use layouts::Layout;
 use rooms::actions::{create_room, show_create_room, show_rooms};
 use shtml::{html, Component, Render};
 use sqlx::{sqlite::SqlitePoolOptions, Pool, Sqlite};
 use state::AppState;
-use tokio::{
-    time::Duration,
-};
+use tokio::time::Duration;
 use tower_http::services::ServeDir;
-use tower_sessions::{cookie::time, ExpiredDeletion, Expiry, SessionManagerLayer};
+use tower_sessions::{cookie::time, ExpiredDeletion, Expiry, Session, SessionManagerLayer};
 use tower_sessions_sqlx_store::SqliteStore;
 use users::actions::{login, register, show_login, show_register};
+use util::ShatError;
 
 mod chat;
 mod components;
@@ -53,17 +53,27 @@ async fn main() {
     axum::serve(listener, app).await.unwrap();
 }
 
-async fn home() -> Html<String> {
+async fn home(session: Session) -> Result<Html<String>, ShatError> {
+    let name = match session.get("name").await {
+        Ok(name) => name,
+        Err(_) => return Err(ShatError::InternalError),
+    };
+
     let result = html! {
         <Layout>
             <h2 class="text-xl">
                 Welcome to the shat stack chat app!
             </h2>
-            <Join/>
+            <Join name=name/>
+            <div class="mt-12">
+                <ButtonLink href="/rooms">
+                    Rooms
+                </ButtonLink>
+            </div>
         </Layout>
     };
 
-    Html(result.to_string())
+    Ok(Html(result.to_string()))
 }
 
 type Db = Pool<Sqlite>;

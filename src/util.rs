@@ -4,21 +4,23 @@ use std::error::Error;
 use axum::{
     body::Body,
     http::{Response, StatusCode},
-    response::{IntoResponse},
+    response::IntoResponse,
 };
 use shtml::{html, Component};
 
 #[derive(Debug)]
 pub enum ShatError {
     NotFound,
-    InternalError,
+    Unauthorized,
     BadRequest,
+    InternalError,
 }
 
 impl fmt::Display for ShatError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             ShatError::NotFound => write!(f, "Not found"),
+            ShatError::Unauthorized => write!(f, "Unauthenticated"),
             ShatError::BadRequest => write!(f, "Bad request"),
             ShatError::InternalError => write!(f, "Internal error"),
         }
@@ -36,18 +38,24 @@ impl IntoResponse for ShatError {
                     404 not found
                 },
             ),
+            ShatError::Unauthorized => (
+                StatusCode::UNAUTHORIZED,
+                html! {
+                    401 unauthorized
+                },
+            ),
             ShatError::BadRequest => (
                 StatusCode::BAD_REQUEST,
                 html! {
                     400 bad request
                 },
             ),
-                ShatError::InternalError => (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    html! {
-                        500 internal server error
-                    },
-                ),
+            ShatError::InternalError => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                html! {
+                    500 internal server error
+                },
+            ),
         };
 
         let body = Body::from(component.to_string());

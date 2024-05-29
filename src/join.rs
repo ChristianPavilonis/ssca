@@ -6,7 +6,7 @@ use crate::{
 };
 use axum::{
     extract::{Form, State},
-    response::Redirect,
+    response::{Html, Redirect},
 };
 use serde::Deserialize;
 use shtml::{html, Component, Render};
@@ -21,27 +21,44 @@ pub async fn join(
     State(chat): State<ChatState>,
     session: Session,
     Form(join_form): Form<JoinForm>,
-) -> Redirect {
+) -> Html<String> {
     session.insert("name", &join_form.name).await.unwrap();
     let mut users = chat.users.lock().unwrap();
 
     if users.contains(&join_form.name) {
-        return Redirect::to("/");
+        return Html(
+            html! {
+                Username is taken!
+            }
+            .to_string(),
+        );
     }
 
     users.insert(join_form.name.clone());
 
-    Redirect::to("/chat")
+    let name = Some(join_form.name);
+
+    Html(
+        html! {
+            <Join name=name/>
+        }
+        .to_string(),
+    )
 }
 
-pub fn Join() -> Component {
-    html! {
-        <form action="/join" method="post">
-            <Field name="name" typ="text">
-                Name
-            </Field>
+pub fn Join(name: Option<String>) -> Component {
+    match name {
+        Some(name) => html! {
+            {format!("Hello, {}!", name)}
+        },
+        None => html! {
+            <form hx-post="/join">
+                <Field name="name" typ="text">
+                    Name
+                </Field>
 
-            <Button>Join</Button>
-        </form>
+                <Button>Join</Button>
+            </form>
+        },
     }
 }

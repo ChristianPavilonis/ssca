@@ -20,3 +20,12 @@ pub fn Button(children: Elements) -> Component {
         </button>
     }
 }
+
+
+pub fn ButtonLink(href: &str, children: Elements) -> Component {
+    html! {
+        <a href=href class="rounded bg-gray-700 px-12">
+            {children}
+        </a>
+    }
+}
