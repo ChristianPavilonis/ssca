@@ -1,4 +1,4 @@
-# The SHAT STACK 💩
+# The SHAT STACK 💩 Chat App
 
 Build blazing fast 🔥 rust 🦀 webapps with the power of 💩ml, htmx, axum, all while looking like THE SHAT with tailwind!
 
@@ -31,6 +31,8 @@ npx tailwindcss -i ./src/app.css -o ./public/app.css --watch
 
 ## Step 4.
 
-Look at this shat on http://localhost:2222
+Look at this shat on http://localhost:3000
 
-Why 2222? Do you even have to ask why?
+## deploy this shat
+
+This repo has a Dockerfile to build the app and a config/deploy.yaml file to deploy using kamal.
