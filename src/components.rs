@@ -21,6 +21,13 @@ pub fn Button(children: Elements) -> Component {
     }
 }
 
+pub fn CancelButton(children: Elements) -> Component {
+    html! {
+        <button class="rounded bg-gray-700 px-12" value="cancel" formmethod="dialog">
+            {children}
+        </button>
+    }
+}
 
 pub fn ButtonLink(href: &str, children: Elements) -> Component {
     html! {

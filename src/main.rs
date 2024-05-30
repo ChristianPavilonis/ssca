@@ -1,10 +1,12 @@
 use axum::{
+    http::StatusCode,
     response::Html,
     routing::{get, post},
     Router,
 };
 use chat::actions::{chat, ws};
 use components::ButtonLink;
+use error::ShatError;
 use join::Join;
 use layouts::Layout;
 use rooms::actions::{create_room, show_create_room, show_rooms};
@@ -15,8 +17,10 @@ use tokio::time::Duration;
 use tower_http::services::ServeDir;
 use tower_sessions::{cookie::time, ExpiredDeletion, Expiry, Session, SessionManagerLayer};
 use tower_sessions_sqlx_store::SqliteStore;
-use users::actions::{login, register, show_login, show_register};
-use error::ShatError;
+use users::{
+    actions::{login, register, show_login, show_register},
+    extractors::OptionalUser,
+};
 
 mod chat;
 mod components;
@@ -45,15 +49,19 @@ async fn main() {
         .route("/rooms/create", get(show_create_room))
         .route("/rooms", get(show_rooms))
         .route("/rooms", post(create_room))
+        .route("/up", get(health_check))
         .fallback_service(ServeDir::new("public"))
         .with_state(state)
         .layer(session_layer);
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:8000").await.unwrap();
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }
 
-async fn home(session: Session) -> Result<Html<String>, ShatError> {
+async fn home(
+    session: Session,
+    OptionalUser(user): OptionalUser,
+) -> Result<Html<String>, ShatError> {
     let name = match session.get("name").await {
         Ok(name) => name,
         Err(_) => return Err(ShatError::InternalError),
@@ -61,6 +69,15 @@ async fn home(session: Session) -> Result<Html<String>, ShatError> {
 
     let result = html! {
         <Layout>
+            {match user {
+                None => html! {
+                    <div class="flex justify-end">
+                        <button class="underline" hx-get="/login" hx-target="#login">Login</button>
+                        <div id="login"></div>
+                    </div>
+                },
+                Some(_) => html!{<></>}
+            }}
             <h2 class="text-xl">
                 Welcome to the shat stack chat app!
             </h2>
@@ -74,6 +91,10 @@ async fn home(session: Session) -> Result<Html<String>, ShatError> {
     };
 
     Ok(Html(result.to_string()))
+}
+
+async fn health_check() -> String {
+    "all good".to_string()
 }
 
 type Db = Pool<Sqlite>;

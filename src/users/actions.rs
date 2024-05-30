@@ -3,7 +3,7 @@ use super::{
     find_user_by_name,
     views::{Login, Register},
 };
-use crate::state::AppState;
+use crate::{error::ShatError, state::AppState};
 use axum::{
     extract::State,
     response::{Html, Redirect},
@@ -43,15 +43,16 @@ pub async fn login(
     State(state): State<AppState>,
     session: Session,
     Form(form): Form<LoginForm>,
-) -> Redirect {
+) -> Result<Redirect, ShatError> {
     match find_user_by_name(&state.db, form.name).await {
-        None => panic!("no user found"),
+        None => Err(ShatError::NotFound),
         Some(user) => {
             if check_password(&user, form.password) {
                 session.insert("user_id", user.id.unwrap()).await.ok();
-                Redirect::to("/")
+                session.insert("name", user.name).await.ok();
+                Ok(Redirect::to("/"))
             } else {
-                Redirect::to("/")
+                Err(ShatError::NotFound)
             }
         }
     }
