@@ -39,8 +39,8 @@ async fn main() {
 
     let app = Router::new()
         .route("/", get(home))
-        .route("/register", get(show_register))
-        .route("/register", post(register))
+        // .route("/register", get(show_register))
+        // .route("/register", post(register))
         .route("/login", get(show_login))
         .route("/login", post(login))
         .route("/join", post(join::join))
@@ -78,13 +78,21 @@ async fn home(
                 },
                 Some(_) => html!{<></>}
             }}
-            <h2 class="text-xl">
-                Welcome to the shat stack chat app!
+            <h2 class="text-3xl">
+                Welcome to the SHAT STACK chat app! {"💩"}
             </h2>
+
+            <div class="py-12">
+                <a class="underline" href="https://github.com/ChristianPavilonis/ssca">
+                    Source code
+                </a>
+            </div>
+
             <Join name=name/>
+
             <div class="mt-12">
                 <ButtonLink href="/rooms">
-                    Rooms
+                    View rooms ->
                 </ButtonLink>
             </div>
         </Layout>

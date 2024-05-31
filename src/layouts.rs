@@ -1,9 +1,9 @@
 #![allow(non_snake_case)]
 
-use shtml::{html as view, Component, Elements, Render};
+use shtml::{html, Component, Elements, Render};
 
 pub fn Layout(elements: Elements) -> Component {
-    view! {
+    html! {
         <!DOCTYPE html>
         <html lang="en">
             <head>

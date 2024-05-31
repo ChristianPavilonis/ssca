@@ -8,15 +8,25 @@ use tower_sessions::Session;
 use crate::error::ShatError;
 use crate::{chat::ws::handle_socket, rooms::get_room_by_name, AppState};
 
-use super::views::Chat;
+use super::views::{Chat, ChatJoinError};
 
 pub async fn chat(
+    session: Session,
     Path(room): Path<String>,
     State(state): State<AppState>,
 ) -> Result<Html<String>, ShatError> {
     let room = get_room_by_name(&state.db, &room)
         .await
         .map_err(|_| ShatError::NotFound)?;
+
+    match session.get::<String>("name").await {
+        Ok(Some(name)) => name,
+        Ok(None) => return Ok(Html(ChatJoinError(room).to_string())),
+        Err(e) => {
+            eprintln!("{e}");
+            return Err(ShatError::InternalError);
+        }
+    };
 
     Ok(Html(Chat(room).to_string()))
 }

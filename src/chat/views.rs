@@ -1,7 +1,11 @@
 #![allow(non_snake_case)]
 
+use crate::join::Join;
 use crate::layouts::Layout;
-use crate::{components::Button, rooms::Room};
+use crate::{
+    components::{Button, ButtonLink},
+    rooms::Room,
+};
 use shtml::{html, Component, Render};
 
 pub fn Chat(room: Room) -> Component {
@@ -29,6 +33,19 @@ pub fn Chat(room: Room) -> Component {
                     scroll.scrollTo(0, scroll.scrollHeight);
                 });
             </script>
+        </Layout>
+    }
+}
+
+pub fn ChatJoinError(room: Room) -> Component {
+    let url = format!("/chat/{}", room.name);
+    html! {
+        <Layout>
+            <Join name={None}/>
+
+            <a class="underline" href={url}>
+                enter room
+            </a>
         </Layout>
     }
 }

@@ -15,7 +15,7 @@ pub fn Field(name: &str, typ: &str, label: Elements) -> Component {
 
 pub fn Button(children: Elements) -> Component {
     html! {
-        <button class="rounded bg-gray-700 px-12">
+        <button class="text-lg rounded bg-gray-700 px-12">
             {children}
         </button>
     }
@@ -23,7 +23,7 @@ pub fn Button(children: Elements) -> Component {
 
 pub fn CancelButton(children: Elements) -> Component {
     html! {
-        <button class="rounded bg-gray-700 px-12" value="cancel" formmethod="dialog">
+        <button class="text-lg rounded bg-gray-700 px-12" value="cancel" formmethod="dialog">
             {children}
         </button>
     }
@@ -31,7 +31,7 @@ pub fn CancelButton(children: Elements) -> Component {
 
 pub fn ButtonLink(href: &str, children: Elements) -> Component {
     html! {
-        <a href=href class="rounded bg-gray-700 px-12">
+        <a href=href class="text-lg rounded bg-gray-700 px-12">
             {children}
         </a>
     }
